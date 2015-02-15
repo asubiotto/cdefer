@@ -9,7 +9,6 @@ For example:
 pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
 
 int main(void) {
-  pthread_mutex_init(&m, NULL)
   pthread_mutex_lock(&m)
   
   defer(pthread_mutex_unlock(&m))
