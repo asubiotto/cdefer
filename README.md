@@ -6,7 +6,7 @@ For example:
 #include <defer.h>
 #include <pthread.h>
 
-pthread_mutex_t m;
+pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
 
 int main(void) {
   pthread_mutex_init(&m, NULL)
