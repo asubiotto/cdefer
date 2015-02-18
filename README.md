@@ -14,6 +14,18 @@ int main(void) {
   
     defer(pthread_mutex_unlock(&m));
     // m is still locked until end of current scope.
+    // ...
+}
+```
+
+To change state, you have to do something like this:
+
+```c
+int main(void) {
+    __block int i = 3; // needs __block tag :(
+
+    defer(printf("i should be 4: %d\n", i));
+    defer(^void() { i++ }());
 }
 ```
 

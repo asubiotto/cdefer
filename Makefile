@@ -1,3 +1,6 @@
+NAME = cdefer
+LIBNAME = lib$(NAME)
+
 # whre test course code is
 TSTDIR = tests
 # where target object files go
@@ -8,31 +11,31 @@ BINDIR = bin
 LIBDIR = lib
 # target directories
 DIRS = $(OBJDIR) $(BINDIR) $(LIBDIR)
-
-NAME   = cdefer
-LIB    = lib$(NAME)
-USRLIB = /usr/local/lib
-USRINC = /usr/local/include
+USRDIR = /usr/local
+USRLIB = $(USRDIR)/lib
+USRINC = $(USRDIR)/include
 
 # names of source files
-SRC = $(notdir $(wildcard *.c))
-ofiles = $(patsubst %.c, %.o, $(SRC))
+src = $(notdir $(wildcard *.c))
+obj = $(patsubst %.c, %.o, $(src))
 # paths of target object files
-OBJ = $(addprefix $(OBJDIR)/, $(ofiles))
-# paths to target library files
-LAO = $(addprefix $(LIBDIR)/, $(ofiles))
+OBJ = $(addprefix $(OBJDIR)/, $(obj))
+# paths of target library files
+LAO = $(addprefix $(LIBDIR)/, $(obj))
 # paths of test files
-TST = $(wildcard $(TSTDIR)/*.c)
+tst = $(basename $(notdir $(wildcard $(TSTDIR)/*.c)))
 # pats of target executables (tests)
-BIN = $(notdir $(basename $(TST)))
-TESTS = $(addprefix $(BINDIR)/, $(BIN))
+TST = $(addprefix $(BINDIR)/, $(tst))
+
+FINALLIB = $(USRLIB)/$(LIBNAME).a
+LOCALLIB = $(LIBDIR)/$(LIBNAME).a
 
 # C compiler
 CC = gcc
 # Wall   - warns about questionable things
 # Werror - makes all warnings errors
 # Wextra - enables some extra warning flags that `all` doesn't set
-CFLAGS = -Wall -Werror -Wextra
+CFLAGS = -Wall -Wextra
 # g    - add symbol table for debugging
 # std= - sets the language standard, in this case c99
 # O    - the level of optimization (3)
@@ -50,13 +53,13 @@ endif
 
 all: $(OBJ)
 
-install: $(USRLIB)/$(LIB).a
+install: $(FINALLIB)
 	$(info $(INFOPRMPT) installing...)
 	@make include
 
-test: $(TESTS)
+test: $(TST)
 	$(info $(INFOPRMPT) running tests...)
-	@for i in $(TESTS); do echo "$$i:"; $$i; done
+	@for i in $(TST); do echo "$$i:"; $$i; done
 
 # build object files--no library
 $(OBJ): $(OBJDIR)/%.o: %.c $(OBJDIR)
@@ -64,12 +67,12 @@ $(OBJ): $(OBJDIR)/%.o: %.c $(OBJDIR)
 	@$(CC) $(CFLAGS) -o $@ -c $<
 
 # move library file into /usr/lical/lib
-$(USRLIB)/$(LIB).a: $(LIBDIR)/$(LIB).a
-	$(info $(INFOPRMPT) symlinking $< to $@...)
+$(FINALLIB): $(LOCALLIB)
+	$(info $(INFOPRMPT) copying $< to $@...)
 	@cp -i $< $@
 
 # build library file
-$(LIBDIR)/$(LIB).a: $(LAO)
+$(LOCALLIB): $(LAO)
 	$(info $(INFOPRMPT) making and linking library archive $@...)
 	@ar cru $@ $^
 	@ranlib $@
@@ -87,7 +90,7 @@ include:
 	@cp -i $(wildcard *.h) $(USRINC)/$(NAME)/
 
 # build tests
-$(BINDIR)/%: $(TSTDIR)/%.c $(BINDIR) $(OBJ)
+$(TST): $(BINDIR)/%: $(TSTDIR)/%.c $(BINDIR) $(OBJ)
 	$(info $(INFOPRMPT) building test $*.c...)
 	@$(CC) $(CFLAGS) $(LFLAGS) -I"." -o $@ $(OBJ) $<
 
@@ -103,4 +106,4 @@ clean:
 
 uninstall:
 	$(info $(INFOPRMPT) uninstalling from system...)
-	@rm -rf $(USRINC)/$(NAME) $(USRLIB)/$(LIB).a
+	@rm -rf $(USRINC)/$(NAME) $(FINALLIB)
