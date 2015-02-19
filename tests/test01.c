@@ -4,12 +4,12 @@
 
 int main(void) {
     puts("First");
-    defer(puts("order."));
-    defer(puts("LIFO"));
-    defer(puts("in"));
-    defer(puts("executed"));
-    defer(puts("are"));
-    defer(puts("These"));
+    defer(puts("Eighth"));
+    defer(puts("Seventh"));
+    defer(puts("Sixth"));
+    defer(puts("Fifth"));
+    defer(puts("Fourth"));
+    defer(puts("Third"));
     puts("Second");
     return 0;
 }
